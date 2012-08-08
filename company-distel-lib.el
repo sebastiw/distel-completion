@@ -1,3 +1,14 @@
+;;;-------------------------------------------------------------
+;;; File    : company-distel-lib.el
+;;; Author  : Sebastian Weddmark Olsson
+;;;           github.com/sebastiw
+;;; Purpose : Library for company-distel. Can get documentation
+;;;           and do Distel request. :) ooooh
+;;; 
+;;; Created : August 2012 as an internship at Klarna AB
+;;; Comment : Please let me know if you find any bugs or you
+;;;           want some feature or something
+;;;-------------------------------------------------------------
 (require 'distel)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;

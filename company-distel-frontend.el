@@ -1,9 +1,19 @@
+;;;-------------------------------------------------------------
+;;; File    : company-distel-frontend.el
+;;; Author  : Sebastian Weddmark Olsson
+;;;           github.com/sebastiw
+;;; Purpose : Not really a frontend, just replaces the function
+;;;           company-finish to start again after a completion.
+;;;           Also to have the helpdocs appear in a popup instead
+;;;           of a new buffer.
+;;; 
+;;; Created : August 2012 as an internship at Klarna AB
+;;; Comment : Please let me know if you find any bugs or you
+;;;           want some feature or something
+;;;-------------------------------------------------------------
 (require 'company)
 (require 'distel)
 (require 'popup)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Company
 
 (defun erl-company-help ()
   (interactive)
@@ -11,8 +21,7 @@
 	   (doc-buffer (or
 			(company-call-backend 'doc-buffer selected)
 			(error "No documentation available"))))
-      (popup-tip doc-buffer :height 30)
-))
+      (popup-tip doc-buffer :height 30)))
 
 (defun company-finish (result)
   (let* ((isok (string-match ":" result))
@@ -34,12 +43,8 @@
   (define-key company-active-map "\C-n" 'company-select-next)
   (define-key company-active-map "\C-p" 'company-select-previous)
   (define-key company-active-map [remap company-show-doc-buffer] 'erl-company-help)
-;;  (require 'company-distel-frontend)
-;  (setq company-frontends (list 'company-distel-frontend))
   (company-mode))
 
 (add-hook 'erlang-mode-hook 'company-distel-setup)
-
-
 
 (provide 'company-distel-frontend)

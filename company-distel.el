@@ -1,3 +1,15 @@
+;;;-------------------------------------------------------------
+;;; File    : company-distel.el
+;;; Author  : Sebastian Weddmark Olsson
+;;;           github.com/sebastiw
+;;; Purpose : Backend for company-mode. To use it add to .emacs:
+;;;           (add-to-list 'company-backends 'company-distel)
+;;;           or (require 'company-distel-frontend)
+;;; 
+;;; Created : August 2012 as an internship at Klarna AB
+;;; Comment : Please let me know if you find any bugs or you
+;;;           want some feature or something
+;;;-------------------------------------------------------------
 (require 'company-distel-lib)
 
 ;;;###autoload
