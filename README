@@ -1,0 +1,7 @@
+Company Distel
+
+Enable autocompletion in your Erlang-files using Company-mode
+
+
+To start, add in .emacs:
+(require 'company-distel-frontend)
