@@ -24,27 +24,37 @@
       (popup-tip doc-buffer :height 30)))
 
 (defun company-finish (result)
-  (let* ((isok (string-match ":" result))
-	 (mod (and isok (substring result 0 isok)))
-	 (fun (and isok (substring result (+ isok 1))))
+  "Overwrites company-finish to add some extra symbols and restart the completion."
+  (let* ((ismod (string-match ":" result))
+	 (mod (substring result 0 ismod))
+	 (fun (and ismod (substring result (+ ismod 1))))
 	 (arg (and fun (erl-company-get-metadoc mod fun)))
-	 (str (company-strip-prefix result)))
-    (insert (or (and (not isok) (concat str ":"))
-		(and (= (length arg) 1) (concat str (erl-format-arglists arg)))
-		str))
-    (when isok (company-cancel result))
-    (setq company-point (or (and (not isok) (+ (point) 1))
-			    (point)))))
+	 (str (company-strip-prefix result))
+	 (inf (gethash result erl-company-completion-info)))
 
-(defun company-distel-setup ()
-  (setq company-minimum-prefix-length 1)
-  (setq company-idle-delay .2)
-  (add-to-list 'company-backends 'company-distel)
-  (define-key company-active-map "\C-n" 'company-select-next)
-  (define-key company-active-map "\C-p" 'company-select-previous)
-  (define-key company-active-map [remap company-show-doc-buffer] 'erl-company-help)
-  (company-mode))
+    ;; insert result
+    (insert (or
+	     (and (not ismod)
+		  ;; if first char is a downcase
+		  (if (eq (string-to-char result)
+			  (downcase (string-to-char result)))
+		      ;; either it is a local function or a module
+		      (if (eql inf 'lu)
+			  (concat str "(")
+			(concat str ":"))
+		    ;; else it is a variable and then just return it
+		    str))
+	     ;; if it is an external function and it has only one arity 
+	     (and (= (length arg) 1) (concat str (erl-format-arglists arg)))
+	     str))
 
-(add-hook 'erlang-mode-hook 'company-distel-setup)
+    (company-cancel result)
+
+    ;; set point to the new position
+    (setq company-point (or (and ismod (+ (point) 1))
+			    (point)))
+
+    ;; if it is a module, start the completion again
+    (when (and mod (not fun) (eql inf 'cc)) (company-manual-begin))))
 
 (provide 'company-distel-frontend)

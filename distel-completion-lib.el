@@ -15,6 +15,28 @@
 ;;; docs funs         ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defun erl-company-get-doc-buffer (args)
+  "Returns a buffer with the documentation for ARGS."
+  (with-current-buffer (company-doc-buffer)
+    (insert (erl-company-get-doc-string args))
+    (current-buffer)))
+
+(defun erl-company-get-doc-string (args)
+  "Returns the documentation string for ARGS."
+  (interactive)
+  (let* ((isok (string-match ":" args))
+	 (mod (substring args 0 isok))
+	 (fun (and isok (substring args (+ isok 1))))
+	 (doc (and fun (erl-company-local-docs mod fun)))
+	 (edocs (when (and mod (or (not doc) (string= doc "")))
+		  (erl-company-get-docs-from-internet-p mod fun)))
+	 (met (and fun (erl-format-arglists (erl-company-get-metadoc mod fun))))
+	 (to-show (or (and (not (string= doc "")) doc)
+		      (and (not (string= edocs "")) edocs)
+		      (and met (concat mod ":" fun met))
+		      (format "Couldn't find any help for %s." args))))
+    to-show))
+
 (defun erl-company-get-docs-from-internet-p (mod fun) ;; maybe version?
   "Download the documentation from internet."
   (let ((str
@@ -140,6 +162,34 @@
 ;;; Local buffer funs ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defun erl-get-dabbrevs (args &optional times limit)
+  "Use `dabbrev' to find last used commands beginning with ARGS in current buffer only. TIMES is how many times it will match, defaults to 5. LIMIT is how far from point it should search, defaults to the start of the previous defun."
+  (when (require 'dabbrev nil t)
+    (dabbrev--reset-global-variables)
+    (setq dabbrev-check-other-buffers nil
+	  dabbrev--last-expansion-location (point))
+    (let ((times (or times 5))
+	  (dabbrev-limit (or limit (- (point) (save-excursion
+						(backward-char (length args))
+						(backward-paragraph)
+						(point)))))
+	  (ret-list '())
+	  str)
+
+	(while (and (> times 0) (dabbrev--find-expansion args 1 nil)))
+      dabbrev--last-table)))
+
+(defun erl-get-functions (args)
+  "Get all function definitions beginning with ARGS in the current buffer."
+  (let ((case-fold-search nil)
+	(funs '())
+	fun-end)
+    (save-excursion
+      (goto-char (point-min))
+      (while (setq fun-end (re-search-forward (format "^%s.*?(" args) nil t))
+	(add-to-list 'funs (buffer-substring (match-beginning 0) (1- fun-end)))))
+    funs))
+
 (defun erl-company-grab-word ()
   "Grab the current Erlang mod/fun/word."
   (interactive)
@@ -147,10 +197,11 @@
 			      (skip-chars-backward "a-zA-Z:_")
 			      (point))))
 
-(defun erl-company-is-comment-or-cite-p ()
+(defun erl-company-is-comment-or-cite-p (&optional poin)
   "Returns t if point is inside a comment or a cite."
   (save-excursion
-    (let ((po (point)))
+    (let ((po (or poin (point))))
+      (goto-char po)
       (beginning-of-line)
       (re-search-forward "[%\|\"|\']" po t)
       (or (eql (char-before) ?%)
@@ -158,5 +209,10 @@
 		   (eql (char-before) ?\'))
 	       (not (re-search-forward "[\"\|\']" po t)))))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Not yet implemented ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(provide 'company-distel-lib)
+
+
+(provide 'distel-completion-lib)

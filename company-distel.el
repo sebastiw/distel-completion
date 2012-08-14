@@ -10,7 +10,11 @@
 ;;; Comment : Please let me know if you find any bugs or you
 ;;;           want some feature or something
 ;;;-------------------------------------------------------------
-(require 'company-distel-lib)
+(require 'distel-completion-lib)
+
+(defvar erl-company-completion-info (make-hash-table)
+"Global variable used by frontend to determine if the completion
+candidate is a module/external function, internal function or a last used.")
 
 ;;;###autoload
 (defun company-distel (command &optional args &rest ignore)
@@ -21,7 +25,18 @@
     (prefix ;; nar ska functionen slas pa? returnera ordet man ar pa.
      (erl-company-find-prefix))
     (candidates ;; vilka ord returneras
-     (erl-company-complete args (current-buffer)))
+     (let ((erl-dabbrevs (erl-get-dabbrevs args))
+	   (cc (erl-company-complete args (current-buffer)))
+	   (local-funs (erl-get-functions args)))
+       
+       (dolist (item cc) (puthash item 'cc erl-company-completion-info))
+       (dolist (item erl-dabbrevs) (puthash item 'lu erl-company-completion-info))
+       (dolist (item local-funs) (puthash item 'lu erl-company-completion-info))
+       
+       (append erl-dabbrevs
+	       local-funs
+	       cc)))
+
     (meta
      (let* ((isok (string-match ":" args))
 	    (mod (and isok (substring args 0 isok)))
@@ -30,9 +45,12 @@
        (when isok (concat "Args: " (erl-format-arglists met)))))
     (doc-buffer
      (erl-company-get-doc-buffer args))
+    (sorted t)
+    (duplicates nil) ;; yes but the list must be sorted
 
     (t ;(message "(%s):%s" command args)
        nil)))
+
 
 (defun erl-company-find-prefix ()
   "Get word at point if it is not in a comment or a cite. If it couldn't find any return 'stop."
@@ -43,24 +61,6 @@
      (or
       (and no-comment word)
       'stop))))
-
-(defun erl-company-get-doc-buffer (args)
-  "Returns a buffer with the documentation for ARGS."
-  (let* ((isok (string-match ":" args))
-	 (mod (or (and isok (substring args 0 isok))
-		  args))
-	 (fun (and isok (substring args (+ isok 1))))
-	 (doc (and fun (erl-company-local-docs mod fun)))
-	 (edocs (when (or (not doc) (string= doc "")) (erl-company-get-docs-from-internet-p mod fun)))
-	 (met (and fun (erl-format-arglists (erl-company-get-metadoc mod fun))))
-	 (to-show (or (and (not (string= doc "")) doc)
-		      (and (not (string= edocs "")) edocs)
-		      (concat mod ":" fun met)
-		      (format "Couldn't find any help for %s" args))))
-
-    (with-current-buffer (company-doc-buffer)
-      (insert to-show)
-      (current-buffer))))
 
 
 (provide 'company-distel)
