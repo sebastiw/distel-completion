@@ -11,6 +11,12 @@
 ;;;-------------------------------------------------------------
 (require 'distel)
 
+(defvar erl-distel-get-doc-from-internet nil
+  "Whether or not to find the documentation on the internet.")
+
+(defvar erl-distel-valid-syntax "a-zA-Z:_-"
+  "Which syntax to skip backwards to find start of word.")
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; docs funs         ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -28,7 +34,10 @@
 	 (mod (substring args 0 isok))
 	 (fun (and isok (substring args (+ isok 1))))
 	 (doc (and fun (erl-company-local-docs mod fun)))
-	 (edocs (when (and mod (or (not doc) (string= doc "")))
+	 (edocs (when (and
+		       erl-distel-get-doc-from-internet
+		       mod
+		       (or (not doc) (string= doc "")))
 		  (erl-company-get-docs-from-internet-p mod fun)))
 	 (met (and fun (erl-format-arglists (erl-company-get-metadoc mod fun))))
 	 (to-show (or (and (not (string= doc "")) doc)
@@ -44,9 +53,8 @@
 	     (url-retrieve-synchronously (format "http://www.erlang.org/doc/man/%s.html" mod))
 	   (goto-char (point-min))
 	   
-	   ;; find <p> containing <a name="module"> then
+	   ;; find <p> containing <a name="`FUN'"> then
 	   ;; find <div class="REFBODY">
-	   
 	   (let* ((m (re-search-forward (or (and fun (format "<p>.*?<a name=\"%s.*?\">" fun))
 					    "<h3>DESCRIPTION</h3>") nil t))
 		  (beg (and m (match-end 0)))
@@ -57,6 +65,7 @@
 	 (erl-company-html-to-string str))))
 
 (defun erl-company-html-to-string (string)
+  "Removes html-tags from `STRING'."
   (let ((replaces '(("</?p>" . "\n")
 		    ("<br>" . "\n")
 		    ("<[^>]*>" . "")
@@ -73,7 +82,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun erl-company-complete (search-string buf)
-  "Complete search-string as a module or function in current buffer."
+  "Complete `search-string' as a external module or function in current buffer."
   (let* ((isok (string-match ":" search-string))
 	 (mod (and isok (substring search-string 0 isok)))
 	 (fun (and isok (substring search-string (+ isok 1))))
@@ -84,9 +93,12 @@
     (mapcar (lambda (item) (concat mod (when mod ":") item))
 	    try-erl-complete-cache)))
 
-(defvar try-erl-args-cache '())
-(defvar try-erl-desc-cache "")
-(defvar try-erl-complete-cache '())
+(defvar try-erl-args-cache '()
+  "Store the functions arguments.")
+(defvar try-erl-desc-cache ""
+  "Store of the description.")
+(defvar try-erl-complete-cache '()
+  "Completion candidates cache.")
 
 (defun erl-company-get-metadoc (mod fun)
   "Get the arguments for a function."
@@ -96,7 +108,7 @@
   try-erl-args-cache)
 
 (defun erl-company-local-docs (mod fun)
-  "Get localdocs for a function."
+  "Get local documentation for a function."
   (erl-company-get-metadoc mod fun)
   (let ((node erl-nodename-cache))
     (setq try-erl-desc-cache "")
@@ -106,6 +118,7 @@
   try-erl-desc-cache)
 
 (defun erl-company-describe (mod fun args)
+  "Get the documentation of a function."
   (erl-spawn
     (erl-send-rpc node 'distel 'describe (list (intern mod)
 					       (intern fun)
@@ -125,6 +138,7 @@
 	(message "fail: %s" else)))))
 
 (defun erl-company-args (mod fun)
+  "Find the arguments to a function `FUN' in a module `MOD'"
   (erl-spawn
     (erl-send-rpc node 'distel 'get_arglists (list mod fun))
     (&erl-company-receive-args)))
@@ -140,11 +154,13 @@
 
 
 (defun erl-complete-module (module)
+  "Get list of modulenames starting with `MODULE'."
   (erl-spawn
     (erl-send-rpc node 'distel 'modules (list module))
     (&erl-complete-receive-completions)))
 
 (defun erl-complete-function (module function)
+  "Get list of function names starting with `FUNCTION'"
   (erl-spawn
     (erl-send-rpc node 'distel 'functions (list module function))
     (&erl-complete-receive-completions)))
@@ -194,7 +210,7 @@
   "Grab the current Erlang mod/fun/word."
   (interactive)
   (buffer-substring (point) (save-excursion
-			      (skip-chars-backward "a-zA-Z:_")
+			      (skip-chars-backward erl-distel-valid-syntax)
 			      (point))))
 
 (defun erl-company-is-comment-or-cite-p (&optional poin)
@@ -208,10 +224,6 @@
 	  (and (or (eql (char-before) ?\")
 		   (eql (char-before) ?\'))
 	       (not (re-search-forward "[\"\|\']" po t)))))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Not yet implemented ;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 

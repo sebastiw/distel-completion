@@ -16,6 +16,7 @@
 (require 'popup)
 
 (defun erl-company-help ()
+  "If help text is activated, show it in a popup-tip instead of a new buffer."
   (interactive)
     (let* ((selected (nth company-selection company-candidates))
 	   (doc-buffer (or
