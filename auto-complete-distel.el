@@ -17,8 +17,8 @@
 (defvar distel-completions
   "All it takes to start a autocomplete backend."
   (list '(prefix . erl-ac-get-start)
-	'(candidates . (erl-company-complete ac-prefix (current-buffer)))
-	'(document . erl-company-get-doc-string)
+	'(candidates . (distel-completion-complete ac-prefix (current-buffer)))
+	'(document . distel-completion-get-doc-string)
 	'(requires . 0)
 	'(symbol . "m")))
 
