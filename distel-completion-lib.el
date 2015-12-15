@@ -11,11 +11,13 @@
 ;;;-------------------------------------------------------------
 (require 'distel)
 
-(defvar erl-distel-get-doc-from-internet nil
-  "Whether or not to find the documentation on the internet.")
+(defcustom distel-completion-get-doc-from-internet t
+  "Try to find the documentation from erlang.org"
+  :group 'distel-completion)
 
-(defvar erl-distel-valid-syntax "a-zA-Z:_-"
-  "Which syntax to skip backwards to find start of word.")
+(defcustom distel-completion-valid-syntax "a-zA-Z:_-"
+  "Which syntax to skip backwards to find start of word."
+  :group 'distel-completion)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; docs funs         ;;;
@@ -34,10 +36,9 @@
 	 (mod (substring args 0 isok))
 	 (fun (and isok (substring args (+ isok 1))))
 	 (doc (and fun (distel-completion-local-docs mod fun)))
-	 (edocs (when (and
-		       erl-distel-get-doc-from-internet
-		       mod
-		       (or (not doc) (string= doc "")))
+	 (edocs (when (and distel-completion-get-doc-from-internet
+                           mod
+                           (or (not doc) (string= doc "")))
 		  (distel-completion-get-docs-from-internet-p mod fun)))
 	 (met (and fun (erl-format-arglists (distel-completion-get-metadoc mod fun))))
 	 (to-show (or (and (not (string= doc "")) doc)
@@ -224,7 +225,7 @@ defaults to the start of the previous defun."
   "Grab the current Erlang mod/fun/word."
   (interactive)
   (buffer-substring (point) (save-excursion
-			      (skip-chars-backward erl-distel-valid-syntax)
+			      (skip-chars-backward distel-completion-valid-syntax)
 			      (point))))
 
 (defun distel-completion-is-comment-or-cite-p (&optional poin)

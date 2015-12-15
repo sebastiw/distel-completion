@@ -145,33 +145,34 @@ buffer."
 (defun erl-company-post-completion (result)
   "After completion, it could be a good idea to add some extra
 symbols (':', '(', etc.) and restart the completion."
-  (let* ((ismod (string-match ":" result))
-	 (mod (substring result 0 ismod))
-	 (fun (and ismod (substring result (+ ismod 1))))
+  (let* ((module-end (string-match ":" result))
+	 (mod (substring result 0 module-end))
+	 (fun (and module-end (substring result (+ module-end 1))))
 	 (arg (and fun (distel-completion-get-metadoc mod fun)))
-         (inf (gethash result erl-company-completion-info))
+         (info (gethash result erl-company-completion-info))
          (extra-symbols (or
-                           (and (not ismod)
-                                ;; if first char is a downcase
-                                (if (eq (string-to-char result)
-                                        (downcase (string-to-char result)))
-                                    ;; it is either a local function or a module
-                                    (if (eql inf 'lu)
-                                        "("
-                                      ":")
-                                  ;; otherwise it is a variable; just return
-                                  ))
-                           ;; if it is an external function and it has only one arity;
-                           ;; expand the arguments
-                           (and (= (length arg) 1) (erl-format-arglists arg))
-                           ;; A variable was inserted, to nothing
-
-                           )))
+                         (and
+                          ;; does not include a ":"
+                          (not module-end)
+                          ;; and if first char is a downcase
+                          (if (eq (string-to-char result)
+                                  (downcase (string-to-char result)))
+                              ;; it is either a local function or a module
+                              (if (eql info 'lu)
+                                  "("
+                                ":")
+                            ;; otherwise it is a variable; dont care, return
+                            ""))
+                         ;; if it is an external function and it has only one
+                         ;; arity; expand the arguments, otherwise just add the
+                         ;; starting parenthesis.
+                         (or  (and (= (length arg) 1) (erl-format-arglists arg))
+                              "("))))
 
     (insert extra-symbols)
 
     ;; Restart completion if it was a module that was inserted
-    (when (and mod (not fun) (eql inf 'cc)) (company-manual-begin))
+    (when (and mod (not fun) (eql info 'cc)) (company-manual-begin))
 
     ;; Return inserted word
     (concat result extra-symbols)))
