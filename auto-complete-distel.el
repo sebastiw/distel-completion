@@ -15,17 +15,17 @@
 (require 'distel-completion-lib)
 
 (defvar distel-completions
-  "All it takes to start a autocomplete backend."
   (list '(prefix . erl-ac-get-start)
 	'(candidates . (distel-completion-complete ac-prefix (current-buffer)))
 	'(document . distel-completion-get-doc-string)
 	'(requires . 0)
-	'(symbol . "m")))
+	'(symbol . "m"))
+    "All it takes to start a autocomplete backend.")
 
 (defun erl-ac-get-start ()
   "Find a valid start of a completion word."
   (save-excursion
-    (skip-chars-backward erl-distel-valid-syntax)
+    (skip-chars-backward distel-completion-valid-syntax)
     (point)))
 
 
