@@ -25,8 +25,9 @@
 (defun erl-ac-get-start ()
   "Find a valid start of a completion word."
   (save-excursion
-    (skip-chars-backward distel-completion-valid-syntax)
-    (point)))
+    (let ((distance (skip-chars-backward distel-completion-valid-syntax)))
+      (when (< distance 0)
+        (point)))))
 
 
 (provide 'auto-complete-distel)
