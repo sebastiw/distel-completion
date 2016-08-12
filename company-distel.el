@@ -1,4 +1,4 @@
-;;; company-distel.el --- Backend for auto-complete
+;;; company-distel.el --- Backend for company-mode
 ;;; Commentary:
 ;;      Author  : Sebastian Weddmark Olsson
 ;;                github.com/sebastiw
