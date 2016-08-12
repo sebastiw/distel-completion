@@ -9,7 +9,7 @@ using Distel as a backend.
 ### with auto-complete-mode
 ```elisp
 (require 'auto-complete-distel)
-(add-hook 'erlang-mode-hook '(lambda () (add-to-list 'ac-sources 'distel-completions)))
+(add-to-list 'ac-sources 'distel-completions)
 ```
 
 ### with company-mode
