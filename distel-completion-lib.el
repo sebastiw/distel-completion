@@ -1,14 +1,16 @@
-;;;-------------------------------------------------------------
-;;; File    : company-distel-lib.el
-;;; Author  : Sebastian Weddmark Olsson
-;;;           github.com/sebastiw
-;;; Purpose : Library for company-distel. Can get documentation
-;;;           and do Distel request. :) ooooh
-;;; 
-;;; Created : August 2012 as an internship at Klarna AB
-;;; Comment : Please let me know if you find any bugs or you
-;;;           want some feature or something
-;;;-------------------------------------------------------------
+;;; distel-completion-lib.el --- The core of distel-completion
+;;; Commentary:
+;;      Author  : Sebastian Weddmark Olsson
+;;                github.com/sebastiw
+;;      Created : August 2012
+;;      License : BEER-WARE
+;;
+;; This file contains the common completion library for both auto-complete as
+;; well as company.  Can find documentation and do Distel request. :) ooooh
+;; Use it to build new completion modules.
+
+;;; Code:
+
 (require 'distel)
 
 (defcustom distel-completion-get-doc-from-internet t

@@ -1,14 +1,21 @@
-;;;-------------------------------------------------------------
-;;; File    : company-distel.el
-;;; Author  : Sebastian Weddmark Olsson
-;;;           github.com/sebastiw
-;;; Purpose : Backend for company-mode. To use it add to .emacs:
-;;;           (add-to-list 'company-backends 'company-distel)
-;;; 
-;;; Created : August 2012 as an internship at Klarna AB
-;;; Comment : Please let me know if you find any bugs or you
-;;;           want some feature or something
-;;;-------------------------------------------------------------
+;;; company-distel.el --- Backend for auto-complete
+;;; Commentary:
+;;      Author  : Sebastian Weddmark Olsson
+;;                github.com/sebastiw
+;;      Created : August 2012
+;;      License : BEER-WARE
+;;
+;; This file contains the backend for company-mode.  To use it you need
+;; to add `company-distel' to the `company-backends' list in your .emacs.
+;; E.g.
+;;   (require 'company)
+;;   (require 'company-distel)
+;;   (add-to-list 'company-backends 'company-distel)
+;;
+;;   Please let me know if you find any bugs or you want some feature
+
+;;; Code:
+
 (require 'distel-completion-lib)
 
 (defcustom erl-company-popup-help nil

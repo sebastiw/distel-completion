@@ -1,6 +1,6 @@
-# Distel-complete
+# Distel-completion
 
-Distel-complete is a completion module for both
+Distel-completion is a completion module for both
 * `auto-complete-mode`
 * `company-mode`
 using Distel as a backend.
@@ -40,6 +40,9 @@ start-of-word. (showing defaults)
 ```elisp
 (setq distel-completion-valid-syntax "a-zA-Z:_-")
 ```
+
+## License
+BEER-WARE (https://en.wikipedia.org/wiki/Beerware)
 
 ## Current issues
 1. fail: badrpc
