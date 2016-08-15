@@ -1,9 +1,5 @@
 ;;; company-distel.el --- Backend for company-mode
 ;;; Commentary:
-;;      Author  : Sebastian Weddmark Olsson
-;;                github.com/sebastiw
-;;      Created : August 2012
-;;      License : BEER-WARE
 ;;
 ;; This file contains the backend for company-mode.  To use it you need
 ;; to add `company-distel' to the `company-backends' list in your .emacs.
@@ -12,7 +8,7 @@
 ;;   (require 'company-distel)
 ;;   (add-to-list 'company-backends 'company-distel)
 ;;
-;;   Please let me know if you find any bugs or you want some feature
+;; Please let me know if you find any bugs or you want some feature
 
 ;;; Code:
 

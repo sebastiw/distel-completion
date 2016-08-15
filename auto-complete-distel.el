@@ -1,9 +1,5 @@
 ;;; auto-complete-distel.el --- Backend for auto-complete
 ;;; Commentary:
-;;      Author  : Sebastian Weddmark Olsson
-;;                github.com/sebastiw
-;;      Created : August 2012
-;;      License : BEER-WARE
 ;;
 ;; This file contains the backend for auto-complete-mode.  To use it you need
 ;; to add `distel-completions' to the `ac-sources' list in your .emacs.
@@ -12,7 +8,7 @@
 ;;   (require 'auto-complete-distel)
 ;;   (add-to-list 'ac-sources 'distel-completions)
 ;;
-;;   Please let me know if you find any bugs or you want some feature
+;; Please let me know if you find any bugs or you want some feature
 
 ;;; Code:
 
