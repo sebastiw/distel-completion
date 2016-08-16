@@ -5,7 +5,6 @@
 ;; Author: Sebastian Weddmark Olsson
 ;; URL: github.com/sebastiw/distel-completion
 ;; Version: 1.0.0
-;; Package-Requires: ((distel "4.1.1"))
 ;; Keywords: Erlang Distel completion
 
 ;; This file is not part of GNU Emacs.
