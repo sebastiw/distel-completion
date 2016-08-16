@@ -1,13 +1,30 @@
-;;; distel-completion-lib.el --- The core of distel-completion
+;;; distel-completion-lib.el --- Completion library for Erlang/Distel
+
+;; Copyright (C) 2012 Sebastian Weddmark Olsson
+
+;; Author: Sebastian Weddmark Olsson
+;; URL: github.com/sebastiw/distel-completion
+;; Version: 1.0.0
+;; Package-Requires: ((distel "4.1.1"))
+;; Keywords: Erlang Distel completion
+
+;; This file is not part of GNU Emacs.
+
+;;; License:
+
+;; BEER-WARE
+;; If you like this package and we meet in the future, you can buy me a
+;; beer. Otherwise, if we don't meet, drink a beer anyway.
+
 ;;; Commentary:
-;;      Author  : Sebastian Weddmark Olsson
-;;                github.com/sebastiw
-;;      Created : August 2012
-;;      License : BEER-WARE
+
+;; Completion library for Erlang using Distel as backend.  If you are interested
+;; to see how it can be used you can checkout the packages
+;; `auto-complete-distel' or `company-distel'
+;; (github.com/sebastiw/distel-completion).
 ;;
-;; This file contains the common completion library for both auto-complete as
-;; well as company.  Can find documentation and do Distel request. :) ooooh
-;; Use it to build new completion modules.
+;; This library can find documentation and do Distel request.  Use it to build
+;; new completion modules.
 
 ;;; Code:
 
@@ -97,19 +114,19 @@
     ;; Let distel complete the function or module, depending if ":" is part of
     ;; the search-string
     (if isok
-        (erl-complete-function mod fun)
-      (erl-complete-module search-string))
+        (distel-completion-complete-function mod fun)
+      (distel-completion-complete-module search-string))
     ;; The call to distel is asynchronous, lets wait some
     (sleep-for 0.1)
     ;; Add the module if needed
     (mapcar (lambda (item) (concat mod (when mod ":") item))
-            try-erl-complete-cache)))
+            distel-completion-try-erl-complete-cache)))
 
-(defvar try-erl-args-cache '()
+(defvar distel-completion-try-erl-args-cache '()
   "Store the functions arguments.")
-(defvar try-erl-desc-cache ""
+(defvar distel-completion-try-erl-desc-cache ""
   "Store of the description.")
-(defvar try-erl-complete-cache '()
+(defvar distel-completion-try-erl-complete-cache '()
   "Completion candidates cache.")
 
 (defun distel-completion-get-metadoc (mod fun)
@@ -117,17 +134,17 @@
   (let ((node erl-nodename-cache))
     (distel-completion-args mod fun))
   (sleep-for 0.1)
-  try-erl-args-cache)
+  distel-completion-try-erl-args-cache)
 
 (defun distel-completion-local-docs (mod fun)
   "Get local documentation for a function."
   (distel-completion-get-metadoc mod fun)
   (let ((node erl-nodename-cache))
-    (setq try-erl-desc-cache "")
-    (dolist (args try-erl-args-cache)
+    (setq distel-completion-try-erl-desc-cache "")
+    (dolist (args distel-completion-try-erl-args-cache)
       (distel-completion-describe mod fun args)))
   (sleep-for 0.1)
-  try-erl-desc-cache)
+  distel-completion-try-erl-desc-cache)
 
 (defun distel-completion-describe (mod fun args)
   "Get the documentation of a function."
@@ -145,7 +162,9 @@
 			     (elt (car desc) 1)
 			     (elt (car desc) 2)
 			     (elt (car desc) 3))))
-	(when desc (setq try-erl-desc-cache (concat descr try-erl-desc-cache)))))
+          (when desc
+            (setq distel-completion-try-erl-desc-cache
+                  (concat descr distel-completion-try-erl-desc-cache)))))
        (else
 	(message "fail: %s" else)))))
 
@@ -159,29 +178,28 @@
   (erl-receive ()
       ((['rex 'error])
        (['rex docs]
-	(setq try-erl-args-cache docs))
+	(setq distel-completion-try-erl-args-cache docs))
        (else
 	(message "fail: %s" else)
-	(setq try-erl-args-cache '())))))
+	(setq distel-completion-try-erl-args-cache '())))))
 
-
-(defun erl-complete-module (module)
+(defun distel-completion-complete-module (module)
   "Get list of modulenames starting with `MODULE'."
   (erl-spawn
     (erl-send-rpc node 'distel 'modules (list module))
-    (&erl-complete-receive-completions)))
+    (&distel-completion-receive-completions)))
 
-(defun erl-complete-function (module function)
+(defun distel-completion-complete-function (module function)
   "Get list of function names starting with `FUNCTION'"
   (erl-spawn
     (erl-send-rpc node 'distel 'functions (list module function))
-    (&erl-complete-receive-completions)))
+    (&distel-completion-receive-completions)))
 
 
-(defun &erl-complete-receive-completions ()
+(defun &distel-completion-receive-completions ()
   (erl-receive ()
       ((['rex ['ok completions]]
-	(setq try-erl-complete-cache completions))
+	(setq distel-completion-try-erl-complete-cache completions))
        (other
 	(message "Unexpected reply: %s" other)))))
 
@@ -190,7 +208,7 @@
 ;;; Local buffer funs ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun erl-get-dabbrevs (args &optional times limit)
+(defun distel-completion-get-dabbrevs (args &optional times limit)
   "Use `dabbrev' to find last used commands beginning with ARGS
 in current buffer only. TIMES is how many times it will match,
 defaults to 5. LIMIT is how far from point it should search,
@@ -210,7 +228,7 @@ defaults to the start of the previous defun."
       (while (and (> times 0) (dabbrev--find-expansion args 1 nil)))
       dabbrev--last-table)))
 
-(defun erl-get-functions (args)
+(defun distel-completion-get-functions (args)
   "Get all function definitions beginning with ARGS in the current buffer."
   (let ((case-fold-search nil)
         (funs '())
@@ -244,3 +262,4 @@ defaults to the start of the previous defun."
 
 
 (provide 'distel-completion-lib)
+;;; distel-completion-lib.el ends here

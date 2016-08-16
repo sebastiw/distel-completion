@@ -1,36 +1,65 @@
-;;; company-distel.el --- Backend for company-mode
+;;; company-distel.el --- Erlang/distel completion backend for company-mode
+
+;; Copyright (C) 2012 Sebastian Weddmark Olsson
+
+;; Author: Sebastian Weddmark Olsson
+;; URL: github.com/sebastiw/distel-completion
+;; Version: 1.0.0
+;; Package-Requires: ((distel-completion-lib "1.0.0"))
+;; Keywords: Erlang Distel company
+
+;; This file is not part of GNU Emacs.
+
+;;; License:
+
+;; BEER-WARE
+;; If you like this package and we meet in the future, you can buy me a
+;; beer. Otherwise, if we don't meet, drink a beer anyway.
+
 ;;; Commentary:
-;;
-;; This file contains the backend for company-mode.  To use it you need
-;; to add `company-distel' to the `company-backends' list in your .emacs.
+
+;; Add `company-distel' to the `company-backends' list in your .emacs.
 ;; E.g.
 ;;   (require 'company)
 ;;   (require 'company-distel)
 ;;   (add-to-list 'company-backends 'company-distel)
 ;;
-;; Please let me know if you find any bugs or you want some feature
+;; Customize
+;; ------------------
+;; When set, the doc-buffer should use a popup instead of a whole buffer.
+;; (setq company-distel-popup-help t)
+;;
+;; Specifies the height of the popup created when `company-distel-popup-help' is
+;; set.
+;; (setq company-distel-popup-height 30)
+;;
+;; Which syntax to skip backwards to find start of word.
+;; (setq distel-completion-get-doc-from-internet t)
+;;
+;; Which syntax to skip backwards to find start of word.
+;; (setq distel-completion-valid-syntax "a-zA-Z:_-")
 
 ;;; Code:
 
 (require 'distel-completion-lib)
 
-(defcustom erl-company-popup-help nil
+(defcustom company-distel-popup-help nil
   "When set, the doc-buffer should use a popup instead of a whole buffer."
   :group 'company-distel)
 
-(defcustom erl-company-popup-height 30
+(defcustom company-distel-popup-height 30
   "Specifies the height of the popup created when
-`erl-company-popup-help' is set."
+`company-distel-popup-help' is set."
   :group 'company-distel)
 
-(defvar erl-company-completion-info (make-hash-table)
+(defvar company-distel-completion-info (make-hash-table)
   "Global variable used by frontend to determine if the
 completion candidate is a module/external function, internal
 function or a last used.")
 
 ;;;###autoload
 (defun company-distel (command &optional args &rest ignore)
-  "Backend for Company-mode using Distel."
+  "Erlang/Distel completion backend for Company-mode."
   (company-distel-modules command args ignore))
 
 (defun company-distel-modules (command &optional args &rest ignore)
@@ -41,16 +70,16 @@ function or a last used.")
      (company-begin-backend 'company-distel-modules))
     (prefix
      ;; which word to start the completion on
-     (erl-company-find-prefix))
+     (company-distel-find-prefix))
     (candidates
      ;; returns the completion candidates
-     (erl-company-get-candidates args))
+     (company-distel-get-candidates args))
     (meta
      ;; a oneline docstring
-     (erl-company-get-metadoc args))
+     (company-distel-get-metadoc args))
     (doc-buffer
      ;; the full documentation accessable by pressing <f1>
-     (erl-company-get-help args))
+     (company-distel-get-help args))
     (post-completion
      ;; start completion for functions in the given module.
      ;; 1. Add a ":" after module completion, or "()" after local function
@@ -59,7 +88,7 @@ function or a last used.")
 
      ;;  (company-distel-functions)
 
-     (erl-company-post-completion args)
+     (company-distel-post-completion args)
      ;; Restart completion if it was a module that was inserted
      (when (eq (last (char-before)) ?\:) (company-manual-begin)))
     (sorted
@@ -85,7 +114,7 @@ function or a last used.")
      nil)
     ))
 
-(defun erl-company-find-prefix ()
+(defun company-distel-find-prefix ()
   "Get word at point if it is not in a comment or a cite. If it
 couldn't find any return 'stop."
   (let (;; Check if point is within a comment or a citation
@@ -101,31 +130,31 @@ couldn't find any return 'stop."
       ;; No word found, stop.
       'stop))))
 
-
-(defun erl-company-get-candidates (prefix)
+(defun company-distel-get-candidates (prefix)
   "Return a list of completion candidates."
   (let (;; erl-dabbrevs lookback in the current function for words starting with
         ;; `prefix'
-        (erl-dabbrevs (erl-get-dabbrevs prefix))
+        (erl-dabbrevs (distel-completion-get-dabbrevs prefix))
         ;; Lookup distel-completion of modules and functions
         (cc (distel-completion-complete prefix (current-buffer)))
         ;; Get functions from current-buffer
-        (local-funs (erl-get-functions prefix)))
+        (local-funs (distel-completion-get-functions prefix)))
 
     ;; Classify each match as either 'cc or 'lu, though I have no clue what the
     ;; abbreviations mean anymore. It is used in the frontend to determine
     ;; wether to add a ":" after the completion candidate or a "(" for local
     ;; functions.
-    (dolist (item cc) (puthash item 'cc erl-company-completion-info))
-    (dolist (item erl-dabbrevs) (puthash item 'lu erl-company-completion-info))
-    (dolist (item local-funs) (puthash item 'lu erl-company-completion-info))
+    (dolist (item cc) (puthash item 'cc company-distel-completion-info))
+    (dolist (item erl-dabbrevs)
+      (puthash item 'lu company-distel-completion-info))
+    (dolist (item local-funs) (puthash item 'lu company-distel-completion-info))
 
     ;; Return all matches
     (append erl-dabbrevs
             local-funs
             cc)))
 
-(defun erl-company-get-metadoc (candidate)
+(defun company-distel-get-metadoc (candidate)
   "Meta-doc is a oneline documentation string, consisting of the
 arguments for the function completion candidate."
   (let* ((isok (string-match ":" candidate))
@@ -135,24 +164,24 @@ arguments for the function completion candidate."
     (when isok
       (concat "Args: " (erl-format-arglists met)))))
 
-(defun erl-company-get-help (candidate)
-  "Get the company-mode's doc-buffer. If `erl-company-popup-help'
+(defun company-distel-get-help (candidate)
+  "Get the company-mode's doc-buffer. If `company-distel-popup-help'
 is set, then show the help as a popup instead of in a new
 buffer."
   (let ((help-text (distel-completion-get-doc-buffer candidate)))
-    (when erl-company-popup-help
+    (when company-distel-popup-help
       (unless (featurep 'popup) (require 'popup))
-      (popup-tip help-text :height erl-company-popup-height))
+      (popup-tip help-text :height company-distel-popup-height))
     help-text))
 
-(defun erl-company-post-completion (result)
+(defun company-distel-post-completion (result)
   "After completion, it could be a good idea to add some extra
 symbols (':', '(', etc.) and restart the completion."
   (let* ((module-end (string-match ":" result))
 	 (mod (substring result 0 module-end))
 	 (fun (and module-end (substring result (+ module-end 1))))
 	 (arg (and fun (distel-completion-get-metadoc mod fun)))
-         (info (gethash result erl-company-completion-info))
+         (info (gethash result company-distel-completion-info))
          (extra-symbols (or
                          (and
                           ;; does not include a ":"
@@ -182,3 +211,4 @@ symbols (':', '(', etc.) and restart the completion."
 
 
 (provide 'company-distel)
+;;; company-distel.el ends here

@@ -1,6 +1,6 @@
 # Distel-completion
 
-Distel-completion is a completion module for both
+Distel-completion is an Erlang completion library for both
 * `auto-complete-mode`
 * `company-mode`
 using Distel as a backend.
@@ -9,7 +9,7 @@ using Distel as a backend.
 ### with auto-complete-mode
 ```elisp
 (require 'auto-complete-distel)
-(add-to-list 'ac-sources 'distel-completions)
+(add-to-list 'ac-sources 'auto-complete-distel)
 ```
 
 ### with company-mode
@@ -18,14 +18,20 @@ using Distel as a backend.
 (add-to-list 'company-backends 'company-distel)
 ```
 
-There is also an optional parameter which can be modified.
+There is also optional parameters which can be modified.
 ```elisp
-(setq erl-company-popup-help t)
+(setq company-distel-popup-help t)
 ```
 
 This will render company's doc-buffer (default &lt;F1&gt; when on a
 completion-candidate) in a small popup (using popup.el) instead of showing the
 whole help-buffer.
+
+```elisp
+(setq company-distel-popup-height 30)
+```
+
+This variable specifies the height of the help popup created by company.
 
 ## Extras
 ### Get Erlang-docs from internet
@@ -62,5 +68,3 @@ results..", it is the same fault.
 3. Show whether the completion candidate is of a module or a local function.
 
 4. Add some formating to documentation-buffer.
-
-
