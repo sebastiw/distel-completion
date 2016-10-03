@@ -123,7 +123,8 @@ couldn't find any return 'stop."
         (word (distel-completion-grab-word)))
     (and
      ;; erlang-mode on?
-     (eq (derived-mode-p 'erlang-mode) 'erlang-mode)
+     (or (eq (derived-mode-p 'erlang-mode) 'erlang-mode)
+         (eq major-mode 'erlang-shell-mode))
      (or
       ;; Not in comment/citation and we have a word
       (and no-comment word)
