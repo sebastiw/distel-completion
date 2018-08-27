@@ -47,9 +47,6 @@ start-of-word. (showing defaults)
 (setq distel-completion-valid-syntax "a-zA-Z:_-")
 ```
 
-## License
-BEER-WARE (https://en.wikipedia.org/wiki/Beerware)
-
 ## Current issues
 1. fail: badrpc
 
@@ -63,8 +60,8 @@ candidate. It actually uses same functionality as `erl-fdoc-describe`
 (C-c C-d d), and if this function stops at "Sent request; waiting for
 results..", it is the same fault.
 
-2. In company-mode restart complletion after completing a module.
+2. In company-mode restart completion after completing a module.
 
 3. Show whether the completion candidate is of a module or a local function.
 
-4. Add some formating to documentation-buffer.
+4. Add some formatting to documentation-buffer.
