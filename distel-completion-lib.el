@@ -9,12 +9,6 @@
 
 ;; This file is not part of GNU Emacs.
 
-;;; License:
-
-;; BEER-WARE
-;; If you like this package and we meet in the future, you can buy me a
-;; beer. Otherwise, if we don't meet, drink a beer anyway.
-
 ;;; Commentary:
 
 ;; Completion library for Erlang using Distel as backend.  If you are interested

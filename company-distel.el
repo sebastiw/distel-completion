@@ -10,12 +10,6 @@
 
 ;; This file is not part of GNU Emacs.
 
-;;; License:
-
-;; BEER-WARE
-;; If you like this package and we meet in the future, you can buy me a
-;; beer. Otherwise, if we don't meet, drink a beer anyway.
-
 ;;; Commentary:
 
 ;; Add `company-distel' to the `company-backends' list in your .emacs.
